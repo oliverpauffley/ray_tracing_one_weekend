@@ -1,0 +1,10 @@
+#+TITLE: Rust Ray Tracing
+
+* Rust Ray Tracing
+Implementing the ray tracer in one weekend from [[https://raytracing.github.io/books/RayTracingInOneWeekend.html][here]].
+
+** Usage
+The program outputs the image in =ppm= format to =stdout= so needs to be written to file. i.e.
+#+begin_src shell
+cargo run > image.ppm
+#+end_src

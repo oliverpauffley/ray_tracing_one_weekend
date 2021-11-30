@@ -11,7 +11,7 @@ impl Ray {
     }
 
     pub fn at(&self, t: f64) -> Point3 {
-        self.origin + self.direction.mul_scalar(t)
+        self.origin + self.direction * t
     }
 }
 

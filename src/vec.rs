@@ -1,6 +1,6 @@
 use std::{
     fmt::Display,
-    ops::{Add, Mul, Sub},
+    ops::{Add, Div, Mul, Sub},
 };
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -12,17 +12,6 @@ impl Vec3 {
 
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self(x, y, z)
-    }
-    pub fn mul_scalar(&self, t: f64) -> Vec3 {
-        Self {
-            0: self.0 * t,
-            1: self.1 * t,
-            2: self.2 * t,
-        }
-    }
-
-    pub fn div(&self, t: f64) -> Vec3 {
-        self.mul_scalar(1.0 / t)
     }
 
     pub fn length_squared(&self) -> f64 {
@@ -45,7 +34,7 @@ impl Vec3 {
     }
 
     pub fn unit_vector(&self) -> Self {
-        self.div(self.length())
+        *self / (self.length())
     }
 }
 
@@ -64,7 +53,7 @@ impl Add for Vec3 {
     }
 }
 
-impl Mul for Vec3 {
+impl Mul<Vec3> for Vec3 {
     type Output = Self;
 
     fn mul(self, rhs: Self) -> Self {
@@ -76,6 +65,25 @@ impl Mul for Vec3 {
     }
 }
 
+impl Mul<f64> for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self {
+        Self {
+            0: self.0 * rhs,
+            1: self.1 * rhs,
+            2: self.2 * rhs,
+        }
+    }
+}
+
+impl Div<f64> for Vec3 {
+    type Output = Self;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        self * (1.0 / rhs)
+    }
+}
 impl Sub for Vec3 {
     type Output = Self;
 
@@ -105,14 +113,14 @@ mod test_vec {
     fn test_mul_scalar() {
         let v = Vec3::new(1.0, 2.0, 3.0);
 
-        assert_eq!(v.mul_scalar(5.0), Vec3::new(5.0, 10.0, 15.0));
+        assert_eq!(v * (5.0), Vec3::new(5.0, 10.0, 15.0));
     }
 
     #[test]
     fn test_div() {
         let v = Vec3::new(4.0, 2.0, 6.0);
 
-        assert_eq!(v.div(2.0), Vec3::new(2.0, 1.0, 3.0));
+        assert_eq!(v / (2.0), Vec3::new(2.0, 1.0, 3.0));
     }
 }
 

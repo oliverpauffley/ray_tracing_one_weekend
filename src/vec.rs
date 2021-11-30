@@ -1,7 +1,4 @@
-use std::{
-    fmt::Display,
-    ops::{Add, Div, Mul, Sub},
-};
+use std::ops::{Add, Div, Mul, Sub};
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Vec3(pub f64, pub f64, pub f64);
@@ -93,15 +90,6 @@ impl Sub for Vec3 {
             1: self.1 - rhs.1,
             2: self.2 - rhs.2,
         }
-    }
-}
-
-impl Display for Vec3 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let ix = (255.999 * self.0) as i64;
-        let iy = (255.999 * self.1) as i64;
-        let iz = (255.999 * self.2) as i64;
-        write!(f, "{} {} {}\n", ix, iy, iz)
     }
 }
 

@@ -18,14 +18,22 @@ mod sphere;
 mod vec;
 
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 400;
-const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
+const IMAGE_WIDTH: i32 = 400;
+const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
 const SAMPLES_PER_PIXEL: usize = 100;
+const MAX_DEPTH: i32 = 50;
 
-fn ray_color(r: &Ray, world: &Vec<Rc<dyn Hittable>>) -> Color {
+fn ray_color(r: &Ray, world: &Vec<Rc<dyn Hittable>>, depth: i32) -> Color {
+    // we have reached the max ray bounce limit, no more light is gathered.
+    if depth <= 0 {
+        return Color::ZERO;
+    }
+
     let mut record = HitRecord::new();
-    if hits(&world, r, 0.0, INFINITY, &mut record) {
-        return (record.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
+    if hits(&world, r, 0.001, INFINITY, &mut record) {
+        let target = record.p + record.normal + Vec3::random_unit_vector();
+        let ray = Ray::new(record.p, target - record.p);
+        return ray_color(&ray, world, depth - 1) * 0.5;
     }
     // produce a blended blue background in the y direction.
     let unit_direction = r.direction.unit_vector();
@@ -60,7 +68,7 @@ fn main() {
                 let v: f64 = (j as f64 + randy) / (IMAGE_HEIGHT - 1) as f64;
 
                 let r = cam.get_ray(u, v);
-                pixel_colour = pixel_colour + ray_color(&r, &world);
+                pixel_colour = pixel_colour + ray_color(&r, &world, MAX_DEPTH);
             }
             pixel_colour.write_color(SAMPLES_PER_PIXEL);
         }

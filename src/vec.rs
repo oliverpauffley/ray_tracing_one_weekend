@@ -21,10 +21,10 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn dot(&self, other: &Self) -> f64 {
+    pub fn dot(&self, other: Self) -> f64 {
         self.0 * other.0 + self.1 * other.1 + self.2 * other.2
     }
-    pub fn cross(&self, other: &Self) -> Self {
+    pub fn cross(&self, other: Self) -> Self {
         Vec3 {
             0: self.1 * other.2 - self.2 * other.1,
             1: self.2 * other.0 - self.0 * other.2,
@@ -56,6 +56,16 @@ impl Vec3 {
 
     pub fn random_unit_vector() -> Vec3 {
         Vec3::random_in_unit_sphere().unit_vector()
+    }
+
+    /// near_zero returns true if the vector is close to zero in all dimensions
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.0.abs() < s && self.1.abs() < s && self.2.abs() < s
+    }
+
+    pub fn reflect(&self, normal: Vec3) -> Vec3 {
+        *self - normal * (self.dot(normal) * 2.0)
     }
 }
 

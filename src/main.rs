@@ -4,15 +4,17 @@ use rand::{self, Rng};
 
 use crate::{
     camera::Camera,
+    material::{Lambertian, Metal},
     sphere::Sphere,
-    vec::{Color, Point3, Vec3},
+    vec::{Color, Point3},
 };
-use hittable::{hits, HitRecord, Hittable};
+use hittable::{hits, Hittable};
 use ray::Ray;
 
 mod camera;
 mod color;
 mod hittable;
+mod material;
 mod ray;
 mod sphere;
 mod vec;
@@ -23,19 +25,21 @@ const IMAGE_HEIGHT: i32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as i32;
 const SAMPLES_PER_PIXEL: usize = 100;
 const MAX_DEPTH: i32 = 50;
 
-fn ray_color(r: &Ray, world: &Vec<Rc<dyn Hittable>>, depth: i32) -> Color {
+fn ray_color(r: Ray, world: &Vec<Rc<dyn Hittable>>, depth: i32) -> Color {
     // we have reached the max ray bounce limit, no more light is gathered.
     if depth <= 0 {
         return Color::ZERO;
     }
 
-    let mut record = HitRecord::new();
-    if hits(&world, r, 0.001, INFINITY, &mut record) {
-        let target = record.p + record.normal + Vec3::random_unit_vector();
-        let ray = Ray::new(record.p, target - record.p);
-        return ray_color(&ray, world, depth - 1) * 0.5;
+    // if we get a hit
+    if let Some(record) = hits(&world, r, 0.001, INFINITY) {
+        // and it hits some material
+        if let Some((attenuation, scattered)) = record.material.scatter(r, &record) {
+            return attenuation * ray_color(scattered, world, depth - 1);
+        }
+        return Color::ZERO;
     }
-    // produce a blended blue background in the y direction.
+    // we didnt hit an object so we produce a blended blue background in the y direction.
     let unit_direction = r.direction.unit_vector();
     let t = 0.5 * (unit_direction.1 + 1.0);
     Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
@@ -43,9 +47,33 @@ fn ray_color(r: &Ray, world: &Vec<Rc<dyn Hittable>>, depth: i32) -> Color {
 
 fn main() {
     // world
+
+    let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let material_center = Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3)));
+    let material_left = Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8)));
+    let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2)));
+
     let mut world: Vec<Rc<dyn Hittable>> = Vec::new();
-    world.push(Rc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
-    world.push(Rc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.push(Rc::new(Sphere::new(
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+        material_center,
+    )));
+    world.push(Rc::new(Sphere::new(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        material_left,
+    )));
+    world.push(Rc::new(Sphere::new(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        material_right,
+    )));
+    world.push(Rc::new(Sphere::new(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+        material_ground,
+    )));
 
     // camera
     let cam = Camera::new();
@@ -68,7 +96,7 @@ fn main() {
                 let v: f64 = (j as f64 + randy) / (IMAGE_HEIGHT - 1) as f64;
 
                 let r = cam.get_ray(u, v);
-                pixel_colour = pixel_colour + ray_color(&r, &world, MAX_DEPTH);
+                pixel_colour = pixel_colour + ray_color(r, &world, MAX_DEPTH);
             }
             pixel_colour.write_color(SAMPLES_PER_PIXEL);
         }

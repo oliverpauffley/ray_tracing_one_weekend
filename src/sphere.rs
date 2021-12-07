@@ -46,12 +46,11 @@ impl Hittable for Sphere {
             }
         }
 
-        let t = root;
         let point = r.at(root);
 
         Some(HitRecord::new(
             r,
-            r.at(root),
+            point,
             (r.at(root) - self.center) / self.radius,
             root,
             self.material.clone(),

@@ -4,7 +4,7 @@ use rand::{self, Rng};
 
 use crate::{
     camera::Camera,
-    material::{Lambertian, Metal},
+    material::{Dielectric, Lambertian, Metal},
     sphere::Sphere,
     vec::{Color, Point3},
 };
@@ -49,9 +49,9 @@ fn main() {
     // world
 
     let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3)));
-    let material_left = Rc::new(Metal::new(Color::new(0.8, 0.8, 0.8)));
-    let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2)));
+    let material_center = Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
+    let material_left = Rc::new(Dielectric::new(1.5));
+    let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.0));
 
     let mut world: Vec<Rc<dyn Hittable>> = Vec::new();
     world.push(Rc::new(Sphere::new(

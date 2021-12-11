@@ -10,6 +10,6 @@ impl Color {
         let ir = (256.0 * r) as i64;
         let ig = (256.0 * g) as i64;
         let ib = (256.0 * b) as i64;
-        print!("{} {} {}\n", ir, ig, ib);
+        println!("{} {} {}", ir, ig, ib);
     }
 }

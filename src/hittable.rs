@@ -1,4 +1,4 @@
-use std::{panic, rc::Rc};
+use std::rc::Rc;
 
 use crate::{
     material::Material,
@@ -58,16 +58,14 @@ pub trait Hittable {
     fn hit(&self, r: Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
-pub fn hits(
-    hittables: &Vec<Rc<dyn Hittable>>,
-    r: Ray,
-    t_min: f64,
-    t_max: f64,
-) -> Option<HitRecord> {
+pub fn hits(hittables: &[Rc<dyn Hittable>], r: Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
+    let mut closet_so_far = t_max;
+    let mut hit_record = None;
     for object in hittables.iter() {
-        if let Some(record) = object.hit(r, t_min, t_max) {
-            return Some(record);
+        if let Some(record) = object.hit(r, t_min, closet_so_far) {
+            closet_so_far = record.t;
+            hit_record = Some(record);
         }
     }
-    None
+    hit_record
 }

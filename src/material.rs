@@ -1,5 +1,3 @@
-use std::panic;
-
 use rand::Rng;
 
 use crate::{
@@ -23,7 +21,7 @@ impl Lambertian {
 }
 
 impl Material for Lambertian {
-    fn scatter(&self, r_in: Ray, hit_record: &HitRecord) -> Option<(Color, Ray)> {
+    fn scatter(&self, _r_in: Ray, hit_record: &HitRecord) -> Option<(Color, Ray)> {
         let mut scatter_direction = hit_record.normal + Vec3::random_unit_vector();
         // catch errors where the scatter is the normal
         if scatter_direction.near_zero() {
